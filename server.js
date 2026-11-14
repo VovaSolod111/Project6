@@ -60,7 +60,24 @@ server.post("/deleteStudent", async (req, res) => {
     }
 });
 
+// Создаёт таблицу students, если её ещё нет в базе
+async function initDb() {
+    try {
+        await conn.query(`CREATE TABLE IF NOT EXISTS students (
+            id_st INT AUTO_INCREMENT PRIMARY KEY,
+            last_name VARCHAR(100) NOT NULL,
+            first_name VARCHAR(100) NOT NULL,
+            email VARCHAR(150) NOT NULL,
+            group_st VARCHAR(50) NOT NULL
+        )`);
+        console.log("База данных подключена, таблица students готова");
+    } catch (err) {
+        console.log("Не удалось подключиться к базе данных:", err.message);
+    }
+}
+
 const port = process.env.PORT || 3000;
 server.listen(port, "0.0.0.0", () => {
     console.log(`Сервер запущен на http://localhost:${port}`);
+    initDb();
 });

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Смена временного пароля</title>
+  <style>
+    body { font: 16px Arial, sans-serif; max-width: 420px; margin: 70px auto; padding: 0 20px; }
+    label, input, button { display: block; width: 100%; }
+    input, button { box-sizing: border-box; padding: 12px; margin-top: 8px; }
+    label { margin-top: 14px; }
+    button { cursor: pointer; }
+    #message { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Сменить временный пароль</h1>
+  <p>Введите email, временный пароль из письма и придумайте новый пароль.</p>
+  <form id="changeForm">
+    <label for="email">Электронная почта</label>
+    <input id="email" name="email" type="email" required maxlength="255" autocomplete="email">
+    <label for="tempPassword">Временный пароль</label>
+    <input id="tempPassword" name="tempPassword" type="password" required autocomplete="current-password">
+    <label for="newPassword">Новый пароль (не менее 8 символов)</label>
+    <input id="newPassword" name="newPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+    <button type="submit">Сохранить новый пароль</button>
+  </form>
+  <p id="message" role="status" aria-live="polite"></p>
+  <p><a href="/">Вернуться к восстановлению</a></p>
+  <script>
+    document.getElementById('changeForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = form.querySelector('button');
+      const message = document.getElementById('message');
+      button.disabled = true;
+      try {
+        const response = await fetch('/changeNewPass', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            tempPassword: document.getElementById('tempPassword').value,
+            newPassword: document.getElementById('newPassword').value
+          })
+        });
+        const data = await response.json();
+        message.textContent = data.message || 'Не удалось изменить пароль.';
+        if (response.ok) form.reset();
+      } catch {
+        message.textContent = 'Не удалось выполнить запрос. Проверьте подключение к серверу.';
+      } finally { button.disabled = false; }
+    });
+  </script>
+</body>
+</html>
